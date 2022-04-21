@@ -53,7 +53,8 @@ while True:
 
                 font = cv2.FONT_HERSHEY_PLAIN
                 colours = np.random.uniform(0, 255, size=(len(boxes), 3))
-
+                  
+                    #this will need to be changed for a code relating to the robot as opposed to boxes on screen
                 if len(indexes) > 0:
                     for i in indexes.flatten():
                         x, y, w, h = boxes[i]
