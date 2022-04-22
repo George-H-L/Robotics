@@ -65,9 +65,8 @@ while True:
                         cv2.putText(img, label + ' ' + confidence, (x, y + 20), font, 2, (255, 255, 255), 2)
 
                 cv2.imshow('Image', img)
-                key = cv2.waitKey(1)
-                if key == 27:
-                    break
+                if cv2.waitKey(1)==ord('q'):
+                     break
 
 cap.release()
 cv2.destroyAllWindows()
