@@ -1,0 +1,298 @@
+import time
+import math
+from sr.robot3 import *
+import cv2
+import numpy as np
+R = Robot()
+#SR0KFF is the wheels board
+#SR0WH1J is the claw board
+motorLeft = R.motor_boards["SR0KFF"].motors[0]
+motorRight = R.motor_boards["SR0KFF"].motors[1]
+#motorLeft is left wheel, motorRight is right wheel 
+motorClaw = R.motor_boards["SR0WH1J"].motors[1]
+motorVert = R.motor_boards["SR0WH1J"].motors[0]
+#motorClaw is claw, motorVert is vertical movement of claw
+def object_detection():
+    while True:
+        # names each frame (_) as img
+        _, img = cap.read()
+        height, width, _ = img.shape
+
+        blob = cv2.dnn.blobFromImage(img, 1 / 255, (416, 416), (0, 0, 0), swapRB=True, crop=False)
+        net.setInput(blob)
+        # Used to obtain output at output layer and assign names
+        output_layers_names = net.getUnconnectedOutLayersNames()
+        LayerOutputs = net.forward(output_layers_names)
+
+        # extracts bounding boxes as list
+        boxes = []
+        # extracts confidence e.g. probability that thing detected is what we want it to be
+        confidences = []
+        # represent predicted classes
+        class_ids = []
+
+        # 1st for loop extracts all information from layers output 2nd extracts information from each detection, score starts from 6th element
+        for output in LayerOutputs:
+            for detection in output:
+                # array of scores that contain predictions
+                scores = detection[5:]
+                # extracts highest scores location
+                class_id = np.argmax(scores)
+                confidence = scores[class_id]
+                if confidence > 0.2:
+                    centre_x = int(detection[0] * width)
+                    centre_y = int(detection[1] * height)
+                    w = int(detection[2] * width)
+                    h = int(detection[3] * height)
+                    # 0,1,2,3 represent where they are in the list and multiplied by height or width so it is readable to cv
+                    x = int(centre_x - w / 2)
+                    y = int(centre_y - h / 2)
+                    # using append to add these newly defined values to the already defined list
+                    boxes.append([x, y, w, h])
+                    confidences.append((float(confidence)))
+                    class_ids.append(class_id)
+
+            # Building a threshold to filter out/ go for the highest probability tin
+        indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.2, 0.1)
+
+        font = cv2.FONT_HERSHEY_PLAIN
+        colours = np.random.uniform(0, 255, size=(len(boxes), 3))
+
+        # this will need to be changed for a code relating to the robot as opposed to boxes on screen
+        if len(indexes) == 0:
+         motorRight.power = 0.5
+        motorLeft.power = 0
+        elif len(indexes) > 0
+        drv(1,3)
+        #once box appears certain size then use claw
+        if w > tbd and h > tbd:
+            motorClaw.power = 1
+            time.sleep(3)
+            motorClaw.power = 0
+            
+        cv2.imshow('Image', img)
+        while true:
+         motorLeft.power == 0 and motorRight.power == 0
+        break
+
+def cstPos(mot, interval):
+  while mot[0].power > 0.1:
+    for i in mot:
+      i.power = i.power - interval
+    time.sleep(0.25)
+  mot.power = 0
+def cstNeg(mot, interval):
+  while mot[0].power < -0.1:
+    for i in mot:
+      i.power = i.power + interval
+    time.sleep(0.25)
+  mot.power = 0
+def cst(mot, interval):
+  if mot[0].power > 0:
+    cstPos(mot, interval)
+  if mot[0].power < 0:
+    cstNeg(mot, interval)
+#cst(mot, interval) means slow down motor "mot" at speed "interval"
+def drv(p, t):
+  motorLeft.power = p
+  motorRight.power = -p
+  time.sleep(t)
+def drvNoDrift(p, t):
+  motorLeft.power = 0.95*p
+  motorRight.power = -p
+  time.sleep(t)
+def brk(interval):
+  cst([motorLeft, motorRight], interval)
+def turnLeft90():
+  motorLeft.power = 0.7
+  motorRight.power = 0.7
+  time.sleep(0.4)
+  motorLeft.power = 0
+  motorRight.power = 0
+def turnRight90():
+  motorRight.power = -0.7
+  motorLeft.power = -0.7
+  time.sleep(0.4)
+  motorLeft.power = 0
+  motorRight.power = 0
+def turnRight120():
+  motorRight.power = -0.7
+  motorLeft.power = -0.7
+  time.sleep(0.408)
+  motorLeft.power = 0
+  motorRight.power = 0
+def turn180():
+  motorLeft.power = 0.4
+  motorRight.power = 0.4
+  time.sleep(2)
+  motorLeft.power = 0
+  motorRight.power = 0
+def goodEnding():
+  motorRight.power = 1
+  motorLeft.power = 1
+def stop():
+  motorRight.power = 0
+  motorLeft.power = 0
+def drop():
+  motorClaw.power = -1
+  time.sleep(3)
+  motorClaw.power = 0
+def ppr():
+  drv(0.4,1.5)
+  stop()
+  time.sleep(1)
+  object_detection()
+  time.sleep(1)
+  turn180()
+  time.sleep(1)
+  drv(0.4,4)
+  stop()
+  time.sleep(1)
+  drop()
+  time.sleep(1)
+  turnLeft90()
+  time.sleep(1)
+  drv(0.4,1.5)
+  stop()
+  time.sleep(1)
+  turnLeft90()
+  time.sleep(1)
+  drv(0.4,4)
+  stop()
+  time.sleep(1)
+  #if can detected:
+    #pick up can
+  time.sleep(1)
+  turn180()
+  time.sleep(1)
+  drv(0.4,4)
+  stop()
+  time.sleep(1)
+  drop()
+  time.sleep(1)
+  turnRight90()
+  time.sleep(1)
+  drv(0.4,5)
+  stop()
+  time.sleep(1)
+  turnRight90()
+  time.sleep(1)
+  drv(0.4,5)
+  stop()
+  #if can detected:
+    #pick up can
+  time.sleep(1)
+  turn180()
+  time.sleep(1)
+  drv(0.4,10)
+  stop()
+  time.sleep(1)
+  drop()
+def pprTest1():
+  drv(0.3,3)
+  stop()
+  time.sleep(1)
+  motorClaw.power = 1
+  time.sleep(2)
+  motorClaw.power = 0
+  time.sleep(1)
+  motorVert.power = -0.7
+  time.sleep(0.5)
+  drv(-1,1)
+  motorLeft.power = COAST
+  motorRight.power = COAST
+  time.sleep(1)
+  motorVert.power = 0
+  time.sleep(1)
+  motorClaw.power = -1
+  time.sleep(3)
+  motorClaw.power = 0
+def pprTest2():
+  drv(0.3,3)
+  stop()
+  time.sleep(1)
+  motorClaw.power = 1
+  time.sleep(2.5)
+  motorClaw.power = 0
+  time.sleep(1)
+  motorVert.power = -0.7
+  time.sleep(0.5)
+  drv(-1,0.75)
+  motorLeft.power = COAST
+  motorRight.power = COAST
+  time.sleep(1)
+  motorVert.power = 0
+  time.sleep(1)
+  motorClaw.power = -1
+  time.sleep(3)
+  motorClaw.power = 0
+
+
+def rightImposter():
+  drv(-0.5,0.5)
+  stop()
+  time.sleep(1)
+  turnRight90()
+  time.sleep(1)
+  drv(0.5,3)
+  stop()
+  turnLeft90()
+  time.sleep(1)
+  drv(0.5,3)
+  stop()
+  time.sleep(1)
+  turnLeft90()
+  time.sleep(1)
+  drv(0.5,3)
+  stop()
+  time.sleep(1)
+  turnLeft90()
+  drv(0.5,3)
+  stop()
+
+def leftImposter():
+  drv(-0.5,0.5)
+  stop()
+  time.sleep(1)
+  turnLeft90()
+  time.sleep(1)
+  drv(0.5,3)
+  stop()
+  turnRight90()
+  time.sleep(1)
+  drv(0.5,3)
+  stop()
+  time.sleep(1)
+  turnRight90()
+  time.sleep(1)
+  drv(0.5,3)
+  stop()
+  time.sleep(1)
+  turnRight90()
+  drv(0.5,3)
+  stop()
+def giveOtherTeamCan():
+  pprTest2()
+  time.sleep(5)
+  drv(-0.5,0.5)
+  stop()
+  turnLeft90()
+  time.sleep(1)
+  drv(0.5,0.5)
+  stop()
+  time.sleep(1)
+  turnRight120()
+  time.sleep(1)
+  drv(0.5,3)
+  stop()
+  time.sleep(1)
+  motorClaw.power = 1
+  time.sleep(3)
+  motorClaw.power = 0
+  time.sleep(1)
+  drv(0.5,1.75)
+  stop()
+
+giveOtherTeamCan()
+cap.release()
+cv2.destroyAllWindows()
