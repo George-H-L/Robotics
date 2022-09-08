@@ -55,10 +55,8 @@ def object_detection():
             # Building a threshold to filter out/ go for the highest probability tin
         indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.2, 0.1)
 
-        font = cv2.FONT_HERSHEY_PLAIN
-        colours = np.random.uniform(0, 255, size=(len(boxes), 3))
 
-        # this will need to be changed for a code relating to the robot as opposed to boxes on screen
+       #turn until can is detected witihin box
         if len(indexes) == 0:
          motorRight.power = 0.5
         motorLeft.power = 0
